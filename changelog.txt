@@ -1,0 +1,22 @@
+====================
+2018/12/5-6 - 2018/12/16-19
+
+- Changed CuBridge methods for Copper to use and return ForeignFunc::Result values.
+- Changed MultifileRunner::require() to print a warning message instead of error message when the path size is zero.
+- Added GUIElement::expandToParentBounds() and CuBridge::gui_expand() to use it.
+- Added GUIWatcher (guiwatcher.h and .cpp).
+- Added cubr_irrevent_translate (.h and .cpp).
+- Changed CuBridge::setGUIEnvironment() to have an argument for a new root GUI element too (since the old one cannot be used).
+- Added CuBridge::gui_watcher() to create GUIWatcherObjects.
+- Fixed CuBridge::gui_getRoot() to reference-count the root element. If this isn't done, then it segfaults when the program closes.
+- Fixed GUI element constructors in CuBridge to use rootElement for parent instead of the root GUI element from IGUIEnvironment.
+
+
+====================
+
+Changelog started 2018/11/9
+
+Technically, this project was fully functional before the changelog was created. However, the Irrlicht interface is in flux, so some of this is simply testing.
+However, a number of important bug fixes and changes have happened since the complete of my first application with this bridge (Tic Tac Toe).
+- Fixed bugs in cubr_attr that incorrectly used s32 values instead of f32 values when saving to certain data types.
+- Updated the CuBridge methods to work with the new Copper FFIServices interface.
