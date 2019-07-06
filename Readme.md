@@ -63,3 +63,5 @@ The [Curri](https://github.com/chronologicaldot/Curri) project provides boiler p
 
 All code and files in this project are copyright 2019 Nicolaus Anderson even where not specified.
 Feel free to use and modify at will.
+You may not claim you wrote this code. That would be lying.
+This code is provided as-is without any expressed guarantee of merchantability or fitness. In no way will the authors of this code be responsible for any loss or damages occuring as a result of the usage of this code.
