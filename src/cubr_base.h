@@ -139,44 +139,48 @@ protected:
 	bool
 	bringToFrontOnParent();
 
-	// v = gui_enabled(elem:)
+	// v = gui_enabled( element: )
 	bool
 	isEnabled();
 
-	// v = gui_visible(elem:)
+	// v = gui_visible( element: )
 	bool
 	isVisible();
 
-	// v = gui_position(elem:) # v == [ x, y, x2, y2 ] #
+	// v = gui_position( element: ) # v == [ x, y, x2, y2 ] #
 	void
 	getRelativePosition( Cu::FunctionObject& ); // The container is for storage of the result
 
-	// v = gui_id(elem:)
+	// v = gui_id( element: )
 	irr::u32
 	getID();
 
-	// v = gui_text(elem:)
+	// v = gui_text( element: )
 	util::String
 	getText();
 
-	// v = gui_child_with_id( elem: id: [search_children:] )
+	// v = gui_child_with_id( element: id: [search_children:] )
 	gui_element_t*
 	getChildWithId( Cu::UInteger, bool );
 /*
 	// Irrlicht doesn't yet provide a way to access a child mutably by index
-	// v = gui_child_at_index( elem: index: )
+	// v = gui_child_at_index( element: index: )
 	gui_element_t*
 	getChildByIndex( Cu::UInteger );
 */
-	// gui_add_child( elem: child: )
+	// gui_add_child( element: child: )
 	void
 	addChild( gui_element_t* );
 
-	// gui_remove_child( elem: child: )
+	// gui_remove_child( element: child: )
 	void
 	removeChild( gui_element_t* );
 
-	// gui_expand( elem: )
+	// gui_remove_children( element: )
+	void
+	removeChildren();
+
+	// gui_expand( element: )
 	bool
 	expandToParentBounds();
 

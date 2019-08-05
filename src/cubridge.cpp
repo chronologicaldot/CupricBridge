@@ -69,6 +69,7 @@ CuBridge::CuBridge(
 			//s1c2("gui_child_at_index"),
 			s1c3("gui_add_child"),
 			s1c4("gui_remove_child"),
+			s1c5("gui_remove_children"),
 
 			s2("gui_attrs"),
 			s3("gui_value"),
@@ -92,6 +93,7 @@ CuBridge::CuBridge(
 	//Cu::addForeignMethodInstance<CuBridge>(engine, s1c2, this, &CuBridge::gui_child_at_index);
 	Cu::addForeignMethodInstance<CuBridge>(engine, s1c3, this, &CuBridge::gui_add_child);
 	Cu::addForeignMethodInstance<CuBridge>(engine, s1c4, this, &CuBridge::gui_remove_child);
+	Cu::addForeignMethodInstance<CuBridge>(engine, s1c5, this, &CuBridge::gui_remove_children);
 
 	Cu::addForeignMethodInstance<CuBridge>(engine, s2, this, &CuBridge::gui_allAttributes);
 	Cu::addForeignMethodInstance<CuBridge>(engine, s3, this, &CuBridge::gui_value);
@@ -355,6 +357,21 @@ CuBridge::gui_remove_child( Cu::FFIServices& ffi ) {
 		parent.removeChild(child);
 	} else {
 		ffi.printCustomInfoCode(CuBridgeMessageCode::GUIElementIsEmpty);
+	}
+	return ForeignFunc::FINISHED;
+}
+
+ForeignFunc::Result
+CuBridge::gui_remove_children( Cu::FFIServices& ffi ) {
+	if ( !ffi.demandAllArgsType( GUIElement::getTypeAsCuType() ) ) {
+		return ForeignFunc::NONFATAL;
+	}
+
+	GUIElement*  element = nullptr;
+	Cu::UInteger  argIndex = 0;
+	for ( ; argIndex < ffi.getArgCount(); ++argIndex ) {
+		element = & (GUIElement&)(ffi.arg(argIndex) );
+		element->removeChildren();
 	}
 	return ForeignFunc::FINISHED;
 }

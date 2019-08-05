@@ -1,4 +1,10 @@
 ====================
+2019/8/5
+
+- Added ability to remove all children via CuBridge::gui_remove_children(), GUIElement::removeChildren()
+
+
+====================
 2018/12/5-6 - 2018/12/16-19
 
 - Changed CuBridge methods for Copper to use and return ForeignFunc::Result values.

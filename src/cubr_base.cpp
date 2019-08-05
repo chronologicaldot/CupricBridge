@@ -245,7 +245,7 @@ GUIElement::getChildWithId( Cu::UInteger  id, bool  searchKids ) {
 /*
 gui_element_t*
 GUIElement::getChildByIndex( Cu::UInteger  index ) {
-	// Cannot convert from const list<IGUIElement> & to list<IGUIElement.
+	// Cannot convert from const list<IGUIElement>& to list<IGUIElement>&.
 	// Irrlicht doesn't yet provide a way to access a child by index
 	irr::core::list<irr::gui::IGUIElement*>&  l = data.access().getChildren();
 	irr::core::list<irr::gui::IGUIElement*>::Iterator  i = l.begin();
@@ -265,6 +265,16 @@ GUIElement::addChild( gui_element_t* child ) {
 void
 GUIElement::removeChild( gui_element_t* child ) {
 	data.access().removeChild(child);
+}
+
+void
+GUIElement::removeChildren() {
+	using list_t = irr::core::list<irr::gui::IGUIElement*>;
+
+	while ( data.access().getChildren().size() > 0 ) {
+		list_t::ConstIterator  iter = data.access().getChildren().begin();
+		data.access().removeChild(*iter);
+	}
 }
 
 bool

@@ -71,6 +71,8 @@ public:
 	ForeignFunc::Result  gui_add_child( Cu::FFIServices& );
 			// gui_remove_child( element: child_element: )
 	ForeignFunc::Result  gui_remove_child( Cu::FFIServices& );
+			// gui_remove_children( element: )
+	ForeignFunc::Result  gui_remove_children( Cu::FFIServices& );
 			// gui_type( element: ) // Returns integer value casted from enum or a string name
 	// TODO
 			// gui_to_front( element: )
