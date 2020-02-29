@@ -232,9 +232,20 @@ CuBridge::gui_watcher( Cu::FFIServices& ffi ) {
 	default: break;
 	}
 
+	irr::core::recti  elemRect;
+	irr::gui::AlignmentInfo  alignInfo;
+	irr::gui::IGUIElement* otherElemElem;
+	irr::gui::IGUIElement* elemElem;
+
 	if ( otherElem && otherElem->getElement() && elem->getElement() ) {
-		elem->getElement()->setRelativePosition( otherElem->getElement()->getRelativePosition() );
-		elem->getElement()->addChild(otherElem->getElement());
+		otherElemElem = otherElem->getElement();
+		elemElem = elem->getElement();
+		elemRect = otherElemElem->getRelativePosition();
+		alignInfo = otherElemElem->getAlignment();
+		otherElemElem->getParent()->addChild(elemElem);
+		elemElem->setRelativePosition( elemRect );
+		elemElem->setAlignment( alignInfo );
+		elemElem->addChild(otherElemElem);
 		otherElem->expandToParentBounds();
 	}
 	if ( notNull(callback) ) {

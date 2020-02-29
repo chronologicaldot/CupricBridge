@@ -1,7 +1,7 @@
 makeVec2 = [x y] {ret([x=x y=y])}
 makeRect = [x y x2 y2]{ ret([x=x y=y x2=x2 y2=y2]) }
 makeCRect = [x y x2 y2]{ ret([corner1=makeVec2(x y) corner2=makeVec2(x2 y2)]) }
-makeRectFromVec2 = [v] { ret([x1=0 y1=0 x2=v.x y2=v.y]) }
+makeRectFromVec2 = [v] { ret([x=0 y=0 x2=v.x y2=v.y]) }
 
 vecXSwap = [v1 v2] {
 	x = v2.x
@@ -72,3 +72,6 @@ RectOps = [
 	}
 ]
 
+makeVec2FromRect = [r]{
+	ret( makeVec2(RectOps.width(r) RectOps.height(r)) )
+}

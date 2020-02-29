@@ -4,7 +4,7 @@ for_members = [parent action] {
 	i = 0
 	loop {
 		if ( equal(i: mllen:) ) { stop }
-		action(member(parent: item_at(ml: i:)))
+		action(member(parent item_at(ml: i:)))
 		++(i:)
 	}
 }

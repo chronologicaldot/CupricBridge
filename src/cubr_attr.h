@@ -25,7 +25,7 @@ f32 getF32Value( Cu::Object*, f32 );
 
 //! Attributes Interface
 /*
-	In order to comminicate with Irrlicht GUI elements and scene nodes fast and effectively,
+	In order to communicate with Irrlicht GUI elements and scene nodes fast and effectively,
 	we use the irr::IAttributes interface.
 	This implementation accepts a variable and uses it as the source of data. The data is extracted from the
 	variable during one of the "get" calls to the interface.
