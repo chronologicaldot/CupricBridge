@@ -6,6 +6,7 @@
 #include "cubr_base.h"
 #include "cubr_attr.h"
 #include "cubr_guiwatcher.h"
+#include "cubr_image.h"
 #include <IVideoDriver.h>
 #include <IGUIButton.h>
 #include <IGUIEnvironment.h>
@@ -47,7 +48,8 @@ namespace cubr {
 CuBridge::CuBridge(
 		Cu::Engine&  eng,
 		gui_environment_t*  gui_environment,
-		gui_element_t*  gui_root_element
+		gui_element_t*  gui_root_element,
+		InitFlags  flags
 )
 	: engine(eng)
 	, guiEnvironment(gui_environment)
@@ -80,8 +82,15 @@ CuBridge::CuBridge(
 			s7("gui_position"),
 			s8("gui_id"),
 			s9("gui_text"),
+			s10("gui_expand"),
 				// image and texture
-			ts0("get_texture");
+			is0("image_create"),
+			is1("image_to_texture"),
+			is2("image_size"),
+			is3("get_pixel"),
+			is4("set_pixel"),
+			ts0("get_texture")
+			;
 
 	Cu::addForeignMethodInstance<CuBridge>(engine, s0, this, &CuBridge::gui_getRoot);
 	Cu::addForeignMethodInstance<CuBridge>(engine, gsx, this, &CuBridge::gui_create);
@@ -104,11 +113,23 @@ CuBridge::CuBridge(
 	Cu::addForeignMethodInstance<CuBridge>(engine, s7, this, &CuBridge::gui_position);
 	Cu::addForeignMethodInstance<CuBridge>(engine, s8, this, &CuBridge::gui_id);
 	Cu::addForeignMethodInstance<CuBridge>(engine, s9, this, &CuBridge::gui_text);
+	Cu::addForeignMethodInstance<CuBridge>(engine, s10, this, &CuBridge::gui_expand);
 
+	Cu::addForeignMethodInstance<CuBridge>(engine, is0, this, &CuBridge::image_create);
+	Cu::addForeignMethodInstance<CuBridge>(engine, is1, this, &CuBridge::image_to_texture);
 	Cu::addForeignMethodInstance<CuBridge>(engine, ts0, this, &CuBridge::texture_access);
+
+	Cu::addForeignFuncInstance(engine, is2, &GetImageDimensions);
+
+	if ( flags.enableImageModifying ) {
+		Cu::addForeignFuncInstance(engine, is3, &GetImagePixel);
+		Cu::addForeignFuncInstance(engine, is4, &SetImagePixel);
+	}
 
 		// gui_set_callback( elem: "gui event name" callback )
 	GUIWatcherObject::addSetterToEngine(engine);
+
+
 }
 
 CuBridge::~CuBridge() {
@@ -571,6 +592,63 @@ CuBridge::gui_attributeSelector( Cu::FFIServices&  ffi, irr::io::SAttributeReadW
 		element.getElement()->serializeAttributes(&attrSource, &options);
 		ffi.setNewResult(attrsContainer);
 	}
+	return ForeignFunc::FINISHED;
+}
+
+irr::video::ECOLOR_FORMAT
+CuBridge::stringToColorFormat( util::String  s ) {
+	if ( s.equals( "A1R5G5B5" ) )
+		return irr::video::ECF_A1R5G5B5;
+
+	if ( s.equals( "R5G6B5" ) )
+		return irr::video::ECF_R5G6B5;
+
+	if ( s.equals( "R8G8B8" ) )
+		return irr::video::ECF_R8G8B8;
+
+	// Default
+	//if ( s == "A8R8G8B8" )
+		return irr::video::ECF_A8R8G8B8;
+}
+
+ForeignFunc::Result
+CuBridge::image_create( Cu::FFIServices&  ffi ) {
+	if ( !ffi.demandArgType(0, Cu::ObjectType::Numeric)
+		|| !ffi.demandArgType(1, Cu::ObjectType::Numeric)
+		|| !ffi.demandArgType(2, Cu::ObjectType::String)
+	) {
+		return ForeignFunc::NONFATAL;
+	}
+
+	Cu::Integer width = ((Cu::NumericObject&)ffi.arg(0)).getIntegerValue();
+	Cu::Integer height = ((Cu::NumericObject&)ffi.arg(1)).getIntegerValue();
+	irr::video::ECOLOR_FORMAT  colorFormat = stringToColorFormat(
+		((Cu::StringObject&)ffi.arg(2)).getString()
+	);
+
+	image_t*  img = guiEnvironment->getVideoDriver()->createImage(
+		colorFormat, core::dimension2du( (irr::u32)width, (irr::u32)height )
+	);
+	ffi.setNewResult( new Image(img, guiEnvironment->getVideoDriver()) );
+	img->drop();
+	return ForeignFunc::FINISHED;
+}
+
+ForeignFunc::Result
+CuBridge::image_to_texture( Cu::FFIServices&  ffi ) {
+	if ( !ffi.demandArgType(0, Image::getTypeAsCuType())
+		|| !ffi.demandArgType(1, Cu::ObjectType::String)
+	) {
+		return ForeignFunc::NONFATAL;
+	}
+
+	image_t*  img = ((Image&)ffi.arg(0)).getImage();
+	util::String  name = ((Cu::StringObject&)ffi.arg(0)).getString();
+
+	texture_t*  tex = guiEnvironment->getVideoDriver()->addTexture( name.c_str(), img );
+	if ( tex )
+		ffi.setNewResult( new Texture(tex) );
+
 	return ForeignFunc::FINISHED;
 }
 

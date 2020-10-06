@@ -236,6 +236,9 @@ public:
 	virtual const char*
 	typeName() const;
 
+	virtual bool
+	supportsInterface( Cu::ObjectType::Value ) const;
+
 	// Helper
 	static Cu::ObjectType::Value
 	getTypeAsCuType() {
@@ -268,6 +271,9 @@ public:
 
 	virtual const char*
 	typeName() const;
+
+	virtual bool
+	supportsInterface( Cu::ObjectType::Value ) const;
 
 	// Helper
 	static Cu::ObjectType::Value

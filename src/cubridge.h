@@ -23,10 +23,21 @@ protected:
 	gui_element_t*  rootElement;
 
 public:
+
+	struct InitFlags {
+		bool  enableImageModifying;
+
+		InitFlags()
+			: enableImageModifying(false)
+		{}
+	};
+
+
 	CuBridge(
 		Cu::Engine&  eng,
 		gui_environment_t*  gui_environment,
-		gui_element_t*  gui_root_element
+		gui_element_t*  gui_root_element,
+		InitFlags  flags = InitFlags()
 	);
 
 	virtual ~CuBridge();
@@ -99,6 +110,18 @@ protected:
 	gui_attributeSelector( Cu::FFIServices&, irr::io::SAttributeReadWriteOptions& );
 
 public:
+	// Converts string values:
+	// "A1R5G5B5" = ECF_A1R5G5B5
+	// "R5G6B5" = ECF_R5G6B5
+	// "R8G8B8" = ECF_R8G8B8
+	// "A8R8G8B8" = ECF_A8R8G8B8
+	irr::video::ECOLOR_FORMAT  stringToColorFormat( util::String );
+
+			// image_create( width: height: [color_format_string:] ) - Default is "A8R8G8B8" (ECF_A8R8G8B8)
+	ForeignFunc::Result  image_create( Cu::FFIServices& );
+
+			// image_to_texture( image: )
+	ForeignFunc::Result  image_to_texture( Cu::FFIServices& );
 
 		// Image and Texture methods
 	virtual texture_t*

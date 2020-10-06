@@ -45,7 +45,7 @@ GUIElement::copy() {
 	// This line is wrong. It should create a NEW, independent copy of the GUI element.
 	//return new GUIElement(data.get());
 /*
-	// TODO FIXME
+	// TODO FIXME ? (Right now, most Copper code I've written assumes no copy)
 	// PROBLEMS:
 	// IGUIEnvironment::addElement doesn't create default elements, so some kind of method would need to do this.
 	// Custom elements just have a generic type - no way to recognize them - so they aren't possible to copy.
@@ -336,6 +336,11 @@ Image::typeName() const {
 	return Image::StaticTypeName();
 }
 
+bool
+Image::supportsInterface( Cu::ObjectType::Value  value ) const {
+	return value == Image::getTypeAsCuType();
+}
+
 Texture::Texture( texture_t* t )
 	: Cu::Object( Texture::getTypeAsCuType() )
 	, data()
@@ -365,6 +370,11 @@ Texture::writeToString(String& out) const {
 const char*
 Texture::typeName() const {
 	return Texture::StaticTypeName();
+}
+
+bool
+Texture::supportsInterface( Cu::ObjectType::Value  value ) const {
+	return value == Texture::getTypeAsCuType();
 }
 
 

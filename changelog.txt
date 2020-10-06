@@ -1,4 +1,10 @@
 ====================
+2020/5
+
+- Added cubr_image.h and cubr_image.cpp
+
+
+====================
 2019/12/31
 
 - Fixed bug in CuBridge::gui_watcher() that failed to set the GUIWatcher element to the alignment of the element it wraps, but the fix requires my custom IGUIElement::getAlignment().

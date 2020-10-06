@@ -27,6 +27,9 @@ struct CuBridgeMessageCode {
 		//! Warning - GUI element did not have a parent
 		GUIElementLacksParent,
 
+		//! Warning - Image set pixel missing color function
+		ImageSetPixelMissingColor,
+
 		//! A useful constant
 		LAST
 	};
