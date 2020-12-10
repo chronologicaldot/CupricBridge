@@ -183,7 +183,7 @@ MultifileRunner::filterPathFromArgs( Cu::FFIServices&  ffi, Cu::UInteger  startA
 	}
 
 	Cu::StringObject&  pathArg = (Cu::StringObject&)ffi.arg(startArg);
-	irr::io::path  filePath = pathArg.getString().c_str();
+	irr::io::path  filePath = irr::io::path( pathArg.getString().c_str() );
 	filePath = rootFilePath + filePath;
 
 	// TODO Filter for true path string? (Remove invalid characters?)

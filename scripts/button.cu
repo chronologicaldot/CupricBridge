@@ -23,5 +23,6 @@ Button.create = [ options ] {
 			watcher = gui_watcher(button, "button click", options.callback)
 		}
 	}
+	# NOTICE: If a watcher is created, you will need to keep it as the parent. Do NOT reparent the button! #
 	ret(button)
 }
