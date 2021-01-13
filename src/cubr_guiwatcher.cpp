@@ -21,7 +21,8 @@ bool
 GUIWatcher::OnEvent(const irr::SEvent&  event) {
 	if ( event.EventType == irr::EET_GUI_EVENT ) {
 		if ( event.GUIEvent.EventType == eventType ) {
-			return run();
+			run();
+			// Do NOT return run()'s result. Do NOT block event-passing chain.
 		}
 	}
 	return IGUIElement::OnEvent(event);
