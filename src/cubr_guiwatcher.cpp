@@ -24,7 +24,7 @@ GUIWatcher::OnEvent(const irr::SEvent&  event) {
 			return run();
 		}
 	}
-	return false;
+	return IGUIElement::OnEvent(event);
 }
 
 void
