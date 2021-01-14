@@ -166,14 +166,19 @@ CuBridge::gui_getRoot( Cu::FFIServices& ffi ) {
 
 ForeignFunc::Result
 CuBridge::gui_create( Cu::FFIServices& ffi ) {
-	if ( !ffi.demandArgCountRange(1,2)
+	if ( !ffi.demandArgCountRange(1,3)
 		|| !ffi.demandArgType(0, Cu::ObjectType::String)
 	) {
 		return ForeignFunc::NONFATAL;
 	}
+	irr::gui::IGUIElement* parent = rootElement;
+	if ( ffi.getArgCount() == 3 && ffi.arg(2).getType() == GUIElement::getTypeAsCuType() )
+	{
+		parent = ((GUIElement&)ffi.arg(2)).getElement();
+	}
 	// Use name for factory
 	const util::String& name = ((Cu::StringObject&)ffi.arg(0)).getString();
-	irr::gui::IGUIElement* e = guiEnvironment->addGUIElement( name.c_str(), rootElement );
+	irr::gui::IGUIElement* e = guiEnvironment->addGUIElement( name.c_str(), parent );
 	return gui_create_element_setup(ffi,e,1);
 }
 
