@@ -18,6 +18,24 @@ GUIWatcher::GUIWatcher(
 {}
 
 bool
+GUIWatcher::bringToFront(irr::gui::IGUIElement* element) {
+	irr::core::list<irr::gui::IGUIElement*>::Iterator it = Children.begin();
+	for (; it != Children.end(); ++it)
+	{
+		if (element == (*it))
+		{
+			Children.erase(it);
+			Children.push_back(element);
+			if ( Parent )
+				Parent->bringToFront(this);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool
 GUIWatcher::OnEvent(const irr::SEvent&  event) {
 	if ( event.EventType == irr::EET_GUI_EVENT ) {
 		if ( event.GUIEvent.EventType == eventType ) {

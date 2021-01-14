@@ -6,6 +6,7 @@
 #include "cubr_defs.h"
 #include "cubr_base.h"
 #include "cubr_irrevent_translate.h"
+#include <IGUIElement.h> // For bringToFront
 
 namespace cubr {
 
@@ -30,13 +31,20 @@ public:
 */
 	GUIWatcher( Cu::Engine*, gui_environment_t*, gui_element_t*, irr::core::recti, irr::s32 );
 
-	virtual bool OnEvent(const irr::SEvent&  event);
+	virtual bool
+	bringToFront(irr::gui::IGUIElement* element);
 
-	void setCallback( irr::gui::EGUI_EVENT_TYPE, Cu::FunctionObject* );
+	virtual bool
+	OnEvent(const irr::SEvent&  event);
 
-	virtual bool owns( Cu::FunctionObject*  container ) const;
+	void
+	setCallback( irr::gui::EGUI_EVENT_TYPE, Cu::FunctionObject* );
 
-	bool run();
+	virtual bool
+	owns( Cu::FunctionObject*  container ) const;
+
+	bool
+	run();
 
 };
 
@@ -52,7 +60,8 @@ public:
 	virtual bool
 	supportsInterface( Cu::ObjectType::Value ) const;
 
-	void setCallback( irr::gui::EGUI_EVENT_TYPE  eventType, Cu::FunctionObject*  callback ) {
+	void
+	setCallback( irr::gui::EGUI_EVENT_TYPE  eventType, Cu::FunctionObject*  callback ) {
 		if ( watcher ) {
 			watcher->setCallback( eventType, callback );
 		}
