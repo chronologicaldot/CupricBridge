@@ -249,8 +249,7 @@ AttributeSource::getAttributeTypeString(s32 index, const wchar_t* defaultNotFoun
 
 bool
 AttributeSource::existsAttribute(const c8* attributeName) const {
-	//return true; // All attributes can exist. (TODO Needs testing)
-	return false; // Pretend it doesn't.
+	return findAttribute(attributeName) != -1;
 }
 
 s32 AttributeSource::findAttribute(const c8* attributeName) const {
