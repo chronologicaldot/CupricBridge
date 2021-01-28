@@ -5,6 +5,7 @@
 - Added GUIWatcher::bringToFront() to allow inserting GUIWatcher between element and its parent.
 - Added IGUIElement parenting in gui_create().
 - Completed AttributeSource::existsAttribute() code.
+- Minor fixes to string return in AttributeSource::getAttributeAsStringW().
 
 
 ====================

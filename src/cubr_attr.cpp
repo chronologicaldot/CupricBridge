@@ -4,8 +4,6 @@
 #include "cubr_base.h"
 #include "cubr_str.h"
 
-#include <cstdio>
-
 namespace cubr {
 
 bool getBoolValue( Cu::Object* obj, bool defaultValue ) {
@@ -370,11 +368,13 @@ AttributeSource::setAttribute(const c8* attributeName, const c8* value) {
 core::stringc
 AttributeSource::getAttributeAsString(const c8* attributeName, const core::stringc& defaultNotFound) const {
 	Cu::Object*  object = getMemberFunctionResult(attributeName);
-	util::String  cs;
+	util::String  cs("");
 	// Note that StringObject and BoolObject are the only native Copper objects that convert their true values to
 	// string via writeToString. The others merely describe themselves in brackets.
 	if (object)
 		object->writeToString(cs);
+	else
+		return defaultNotFound;
 
 	return core::stringc(cs.c_str());
 }
@@ -382,7 +382,7 @@ AttributeSource::getAttributeAsString(const c8* attributeName, const core::strin
 void
 AttributeSource::getAttributeAsString(const c8* attributeName, c8* target) const {
 	Cu::Object*  object = getMemberFunctionResult(attributeName);
-	util::String  cs;
+	util::String  cs("");
 	// Note that StringObject and BoolObject are the only native Copper objects that convert their true values to
 	// string via writeToString. The others merely describe themselves in brackets.
 	if (object)
@@ -425,8 +425,9 @@ core::stringw
 AttributeSource::getAttributeAsStringW(const c8* attributeName, const core::stringw& defaultNotFound) const {
 	Cu::Object*  object = getMemberFunctionResult(attributeName);
 	util::String  cs = "";
-	// Note that StringObject and BoolObject are the only native Copper objects that convert their true values to
-	// string via writeToString. The others merely describe themselves in brackets.
+
+	// Note that StringObject and BoolObject are the only native Copper objects that convert their true values
+	// to string via writeToString. The others merely describe themselves in brackets.
 	if (object) {
 		object->writeToString(cs);
 		if ( cs.size() > 0 ) {
@@ -434,15 +435,16 @@ AttributeSource::getAttributeAsStringW(const c8* attributeName, const core::stri
 			return CuStrToIrrStrW(cs);
 		}
 	}
-	return core::stringw();
+	return defaultNotFound;
 }
 
 void
 AttributeSource::getAttributeAsStringW(const c8* attributeName, wchar_t* target) const {
 	Cu::Object*  object = getMemberFunctionResult(attributeName);
 	util::String  cs = "";
-	// Note that StringObject and BoolObject are the only native Copper objects that convert their true values to
-	// string via writeToString. The others merely describe themselves in brackets.
+
+	// Note that StringObject and BoolObject are the only native Copper objects that convert their true values
+	// to string via writeToString. The others merely describe themselves in brackets.
 	if ( !object)
 		return;
 
