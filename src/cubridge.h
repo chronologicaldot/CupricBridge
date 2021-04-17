@@ -6,6 +6,7 @@
 #include <IGUIEnvironment.h> // from Irrlicht
 #include <Copper.h>
 #include "cubr_base.h"
+#include "json/cubr_json.h"
 
 namespace cubr {
 
@@ -21,14 +22,17 @@ protected:
 	Cu::Engine&  engine;
 	gui_environment_t*  guiEnvironment;
 	gui_element_t*  rootElement;
+	json::Hub jsonHub;
 
 public:
 
 	struct InitFlags {
 		bool  enableImageModifying;
+		bool  enableJSON;
 
 		InitFlags()
 			: enableImageModifying(false)
+			, enableJSON(false)
 		{}
 	};
 
