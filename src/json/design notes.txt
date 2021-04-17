@@ -1,0 +1,12 @@
+
+Instead of using accessors with IDs, which takes time to search, I could have an Existence Flag object that is reference-counted and pointed to by the Storage and by the Accessors. The Storage can set the flag to indicate it has died. The accessors can check this flag to make sure their pointers are still valid. The entire system would have to work on integrity, less safe than what I'm doing now because there would be a bunch of invalid pointers in existence. However, accessors could be created and destroyed at whim and access would be immediate rather than dependent on the number of accessors in existence.
+
+
+Alternatively, I could have the accessors be the only point of access to the storage. But this doesn't make sense because I still need to load somehow. I guess the accessors could have control over loading and saving data in the tree.
+Basically, this separates the data from the Copper stack, which I don't like. It also means that copies of the accessor Copper objects would be the only kind of copy available (unless I provided another copy mechanism).
+
+
+BEST IDEA:
+
+Alternatively, I could have Accessors be included in a listeners list. They would then be notified when the data is destroyed. This seems more guaranteed than requiring Accessors check an Existence Flag even though ultimately it's the same guarantee.
+Each Accessor would have a listener method that, when called, sets a boolean flag that disables access of the Accessor methods to the data and (or simply) nullifies the pointer to the data/Storage.

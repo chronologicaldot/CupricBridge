@@ -3,7 +3,7 @@
 local v_cubr_path = "../../src/"
 local v_copper_path = "../../../CopperLang/Copper/src/"
 local v_copper_stdlib_path = "../../../CopperLang/Copper/stdlib/"
-local v_irrext_path = "../../../../IrrExtensions/"
+local v_irrext_path = "../../../../Irrlicht/IrrExtensions/"
 local v_irrlicht_home = "/usr/local"
 local v_irrlicht_include = "/usr/local/include/irrlicht/"
 
@@ -26,7 +26,7 @@ workspace "Debug CuBridge"
 project "Debug CuBridge"
 	targetname "debug.out"
 	language "C++"
-	flags { "C++11" }
+	cppdialect "C++11"
 	kind "ConsoleApp"
 	links {
 		"Irrlicht",
@@ -47,6 +47,8 @@ project "Debug CuBridge"
 		, v_copper_path .. "**.cpp"
 		, v_copper_stdlib_path .. "**.h"
 		, v_copper_stdlib_path .. "**.cpp"
+		, v_irrext_path .. "util/irrTree/irrTree.cpp"
+		, v_irrext_path .. "util/irrJSON/irrJSON.cpp"
 	}
 	removefiles {
 		v_cubr_path .. "excludes/**.h"
@@ -58,6 +60,8 @@ project "Debug CuBridge"
 		, "-I" .. v_b_copper_stdlib_path
 		, "-I" .. v_irrlicht_include
 		, "-I" .. v_b_irrext_path
+		, "-I" .. v_b_irrext_path .. "./util/irrTree"
+		, "-I" .. v_b_irrext_path .. "./util/irrJSON"
 	}
 	linkoptions {
 		" -L" .. v_irrlicht_home .. "/lib"

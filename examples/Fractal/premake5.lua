@@ -5,6 +5,7 @@ local v_cubr_path = "../../src/"
 local v_copper_path = "../../../CopperLang/Copper/src/"
 local v_copper_stdlib_path = "../../../CopperLang/Copper/stdlib/"
 local v_copper_exts_path = "../../../CopperLang/exts/"
+local v_irrext_path = "../../../../Irrlicht/IrrExtensions/"
 local v_irrlicht_home = "/usr/local"
 local v_irrlicht_include = "/usr/local/include/irrlicht/"
 
@@ -13,6 +14,7 @@ local v_b_cubr_path = "../" .. v_cubr_path
 local v_b_copper_path = "../" .. v_copper_path
 local v_b_copper_stdlib_path = "../" .. v_copper_stdlib_path
 local v_b_copper_exts_path = "../" .. v_copper_exts_path
+local v_b_irrext_path = "../" .. v_irrext_path
 
 
 workspace "Debug CuBridge"
@@ -29,7 +31,7 @@ workspace "Debug CuBridge"
 project "Debug CuBridge"
 	targetname "fractal.out"
 	language "C++"
-	flags { "C++11" }
+	cppdialect "C++11"
 	kind "ConsoleApp"
 	links {
 		"Irrlicht",
@@ -51,6 +53,8 @@ project "Debug CuBridge"
 		, v_copper_stdlib_path .. "**.cpp"
 		, v_copper_exts_path .. "Math/cu_basicmath.h"
 		, v_copper_exts_path .. "Math/cu_basicmath.cpp"
+		, v_irrext_path .. "util/irrTree/irrTree.cpp"
+		, v_irrext_path .. "util/irrJSON/irrJSON.cpp"
 	}
 	removefiles {
 		v_cubr_path .. "excludes/**.h"
@@ -62,6 +66,8 @@ project "Debug CuBridge"
 		, "-I" .. v_b_copper_stdlib_path
 		, "-I" .. v_b_copper_exts_path .. "Math/" -- For some reason, I'm getting a segfault when this is enabled (see "run error.txt")
 		, "-I" .. v_irrlicht_include
+		, "-I" .. v_b_irrext_path .. "./util/irrTree"
+		, "-I" .. v_b_irrext_path .. "./util/irrJSON"
 	}
 	linkoptions {
 		" -L" .. v_irrlicht_home .. "/lib"

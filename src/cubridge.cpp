@@ -259,7 +259,6 @@ CuBridge::gui_watcher( Cu::FFIServices& ffi ) {
 	}
 
 	irr::core::recti  elemRect;
-	irr::gui::AlignmentInfo  alignInfo;
 	irr::gui::IGUIElement* otherElemElem;
 	irr::gui::IGUIElement* elemElem;
 
@@ -267,10 +266,9 @@ CuBridge::gui_watcher( Cu::FFIServices& ffi ) {
 		otherElemElem = otherElem->getElement();
 		elemElem = elem->getElement();
 		elemRect = otherElemElem->getRelativePosition();
-		alignInfo = otherElemElem->getAlignment();
 		otherElemElem->getParent()->addChild(elemElem);
 		elemElem->setRelativePosition( elemRect );
-		elemElem->setAlignment( alignInfo );
+		elemElem->setAlignment( otherElemElem->getAlignLeft(), otherElemElem->getAlignRight(), otherElemElem->getAlignTop(), otherElemElem->getAlignBottom() );
 		elemElem->addChild(otherElemElem);
 		otherElem->expandToParentBounds();
 	}

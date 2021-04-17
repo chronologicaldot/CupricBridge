@@ -13,18 +13,18 @@ endif
 ifeq ($(config),debug)
   RESCOMP = windres
   TARGETDIR = ..
-  TARGET = $(TARGETDIR)/tictactoe.out
+  TARGET = $(TARGETDIR)/fractal.out
   OBJDIR = obj
   DEFINES += -DSYSTEM=Linux
   INCLUDES +=
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O0  -g -Wfatal-errors -Wall -I../../../src/ -I../../../../CopperLang/Copper/src/ -I../../../../CopperLang/Copper/stdlib/ -I/usr/local/include/irrlicht/ -I../../../../../Irrlicht/IrrExtensions/ -I../../../../../Irrlicht/IrrExtensions/./util/irrTree -I../../../../../Irrlicht/IrrExtensions/./util/irrJSON
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O0 -std=c++11  -g -Wfatal-errors -Wall -I../../../src/ -I../../../../CopperLang/Copper/src/ -I../../../../CopperLang/Copper/stdlib/ -I/usr/local/include/irrlicht/ -I../../../../../Irrlicht/IrrExtensions/ -I../../../../../Irrlicht/IrrExtensions/./util/irrTree -I../../../../../Irrlicht/IrrExtensions/./util/irrJSON
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O0  -g -Wfatal-errors -Wall -I../../../src/ -I../../../../CopperLang/Copper/src/ -I../../../../CopperLang/Copper/stdlib/ -I../../../../CopperLang/exts/Math/ -I/usr/local/include/irrlicht/ -I../../../../../Irrlicht/IrrExtensions/./util/irrTree -I../../../../../Irrlicht/IrrExtensions/./util/irrJSON
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O0 -std=c++11  -g -Wfatal-errors -Wall -I../../../src/ -I../../../../CopperLang/Copper/src/ -I../../../../CopperLang/Copper/stdlib/ -I../../../../CopperLang/exts/Math/ -I/usr/local/include/irrlicht/ -I../../../../../Irrlicht/IrrExtensions/./util/irrTree -I../../../../../Irrlicht/IrrExtensions/./util/irrJSON
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += -lIrrlicht -lGL -lXxf86vm -lXext -lX11 -lXcursor
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -s  -L/usr/local/lib
+  ALL_LDFLAGS += $(LDFLAGS) -s  -L/usr/local/lib  -rdynamic 
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef
@@ -38,7 +38,6 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
-	$(OBJDIR)/GUIDropdownSelector.o \
 	$(OBJDIR)/irrJSON.o \
 	$(OBJDIR)/irrTree.o \
 	$(OBJDIR)/Copper.o \
@@ -48,6 +47,7 @@ OBJECTS := \
 	$(OBJDIR)/FileInStream.o \
 	$(OBJDIR)/InStreamLogger.o \
 	$(OBJDIR)/StringInStream.o \
+	$(OBJDIR)/cu_basicmath.o \
 	$(OBJDIR)/cubr_attr.o \
 	$(OBJDIR)/cubr_base.o \
 	$(OBJDIR)/cubr_event.o \
@@ -118,9 +118,6 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
-$(OBJDIR)/GUIDropdownSelector.o: ../../../../../Irrlicht/IrrExtensions/gui/GUIDropdownSelector.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/irrJSON.o: ../../../../../Irrlicht/IrrExtensions/util/irrJSON/irrJSON.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -146,6 +143,9 @@ $(OBJDIR)/InStreamLogger.o: ../../../../CopperLang/Copper/stdlib/InStreamLogger.
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/StringInStream.o: ../../../../CopperLang/Copper/stdlib/StringInStream.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cu_basicmath.o: ../../../../CopperLang/exts/Math/cu_basicmath.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/cubr_attr.o: ../../../src/cubr_attr.cpp

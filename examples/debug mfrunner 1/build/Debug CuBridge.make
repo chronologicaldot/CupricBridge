@@ -19,8 +19,8 @@ ifeq ($(config),debug)
   INCLUDES +=
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O0  -g -I../../../src/ -I../../../../CopperLang/Copper/src/ -I../../../../CopperLang/Copper/stdlib/ -I/usr/local/include/irrlicht/ -I../../../../../IrrExtensions/
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O0 -std=c++11  -g -I../../../src/ -I../../../../CopperLang/Copper/src/ -I../../../../CopperLang/Copper/stdlib/ -I/usr/local/include/irrlicht/ -I../../../../../IrrExtensions/
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O0  -g -I../../../src/ -I../../../../CopperLang/Copper/src/ -I../../../../CopperLang/Copper/stdlib/ -I/usr/local/include/irrlicht/ -I../../../../../Irrlicht/IrrExtensions/ -I../../../../../Irrlicht/IrrExtensions/./util/irrTree -I../../../../../Irrlicht/IrrExtensions/./util/irrJSON
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O0 -std=c++11  -g -I../../../src/ -I../../../../CopperLang/Copper/src/ -I../../../../CopperLang/Copper/stdlib/ -I/usr/local/include/irrlicht/ -I../../../../../Irrlicht/IrrExtensions/ -I../../../../../Irrlicht/IrrExtensions/./util/irrTree -I../../../../../Irrlicht/IrrExtensions/./util/irrJSON
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += -lIrrlicht -lGL -lXxf86vm -lXext -lX11 -lXcursor
   LDDEPS +=
@@ -32,14 +32,17 @@ ifeq ($(config),debug)
   endef
   define POSTBUILDCMDS
   endef
-all: $(TARGETDIR) $(OBJDIR) prebuild prelink $(TARGET)
+all: prebuild prelink $(TARGET)
 	@:
 
 endif
 
 OBJECTS := \
+	$(OBJDIR)/irrJSON.o \
+	$(OBJDIR)/irrTree.o \
 	$(OBJDIR)/Copper.o \
 	$(OBJDIR)/Strings.o \
+	$(OBJDIR)/CuAccessHelper.o \
 	$(OBJDIR)/EngMsgToStr.o \
 	$(OBJDIR)/FileInStream.o \
 	$(OBJDIR)/InStreamLogger.o \
@@ -48,28 +51,29 @@ OBJECTS := \
 	$(OBJDIR)/cubr_base.o \
 	$(OBJDIR)/cubr_event.o \
 	$(OBJDIR)/cubr_guiwatcher.o \
+	$(OBJDIR)/cubr_image.o \
 	$(OBJDIR)/cubr_irrevent_translate.o \
 	$(OBJDIR)/cubr_mfrunner.o \
 	$(OBJDIR)/cubr_str.o \
 	$(OBJDIR)/cubridge.o \
+	$(OBJDIR)/cubr_json.o \
 	$(OBJDIR)/debug.o \
 
 RESOURCES := \
 
 CUSTOMFILES := \
 
-SHELLTYPE := msdos
-ifeq (,$(ComSpec)$(COMSPEC))
-  SHELLTYPE := posix
-endif
-ifeq (/bin,$(findstring /bin,$(SHELL)))
-  SHELLTYPE := posix
+SHELLTYPE := posix
+ifeq (.exe,$(findstring .exe,$(ComSpec)))
+	SHELLTYPE := msdos
 endif
 
-$(TARGET): $(GCH) ${CUSTOMFILES} $(OBJECTS) $(LDDEPS) $(RESOURCES)
+$(TARGET): $(GCH) ${CUSTOMFILES} $(OBJECTS) $(LDDEPS) $(RESOURCES) | $(TARGETDIR)
 	@echo Linking Debug CuBridge
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
+
+$(CUSTOMFILES): | $(OBJDIR)
 
 $(TARGETDIR):
 	@echo Creating $(TARGETDIR)
@@ -104,16 +108,27 @@ prelink:
 	$(PRELINKCMDS)
 
 ifneq (,$(PCH))
-$(OBJECTS): $(GCH) $(PCH)
-$(GCH): $(PCH)
+$(OBJECTS): $(GCH) $(PCH) | $(OBJDIR)
+$(GCH): $(PCH) | $(OBJDIR)
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) -x c++-header $(ALL_CXXFLAGS) -o "$@" -MF "$(@:%.gch=%.d)" -c "$<"
+else
+$(OBJECTS): | $(OBJDIR)
 endif
 
+$(OBJDIR)/irrJSON.o: ../../../../../Irrlicht/IrrExtensions/util/irrJSON/irrJSON.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/irrTree.o: ../../../../../Irrlicht/IrrExtensions/util/irrTree/irrTree.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Copper.o: ../../../../CopperLang/Copper/src/Copper.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Strings.o: ../../../../CopperLang/Copper/src/Strings.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/CuAccessHelper.o: ../../../../CopperLang/Copper/stdlib/CuAccessHelper.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/EngMsgToStr.o: ../../../../CopperLang/Copper/stdlib/EngMsgToStr.cpp
@@ -140,6 +155,9 @@ $(OBJDIR)/cubr_event.o: ../../../src/cubr_event.cpp
 $(OBJDIR)/cubr_guiwatcher.o: ../../../src/cubr_guiwatcher.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cubr_image.o: ../../../src/cubr_image.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/cubr_irrevent_translate.o: ../../../src/cubr_irrevent_translate.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -150,6 +168,9 @@ $(OBJDIR)/cubr_str.o: ../../../src/cubr_str.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/cubridge.o: ../../../src/cubridge.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/cubr_json.o: ../../../src/json/cubr_json.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/debug.o: ../debug.cpp

@@ -3,6 +3,54 @@ Feel free to modify and share. #
 
 # Utilities #
 
+makeVect = [x y] {
+	ret([x=x y=y])
+}
+
+movedVectX = [vect x]{
+	vect.x = +(vect.x: x:)
+	ret(vect)
+}
+
+movedVectY = [vect y]{
+	vect.y = +(vect.y: y:)
+	ret(vect)
+}
+
+makeRect = [x y x2 y2] {
+	ret([x=x y=y x2=x2 y2=y2])
+}
+
+movedRect = [rect shift] {
+	ret([
+		x=+(rect.x: shift.x:)
+		y=+(rect.y: shift.y:)
+		x2=+(rect.x2: shift.x:)
+		y2=+(rect.y2: shift.y:)
+	])
+}
+
+foreach = [items do] {
+	ml = member_list(items)
+	mllen = length(ml:)
+	i = 0
+	loop {
+		if ( equal(i: mllen:) ) { stop }
+		do(member(items: item_at(ml: i:)))
+		++(i:)
+	}
+}
+
+forlist = [items do] {
+	len = length(items:)
+	i = 0
+	loop {
+		if ( equal(i: len:) ) { stop }
+		do(item_at(items: i:))
+		++(i:)
+	}
+}
+
 for = [count do] {
 	i = 0
 	loop {
@@ -10,6 +58,14 @@ for = [count do] {
 		do(copy_of(i)) # copy_of prevents modding i #
 		++(i:)
 	}
+}
+
+leaper = [leap]{
+	ret([i=0 leap=leap]{
+		i2 = this.i
+		this.i = +(this.i: this.leap:)
+		ret(i2:)
+	})
 }
 
 complex = [

@@ -1,0 +1,25 @@
+Whenever I include in my premake file the following line in the build options:
+		--, "-I" .. v_b_copper_exts_path .. "Math/" -- For some reason, I'm getting a segfault when this is enabled (see below)
+I get this from gdb:
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00000000 in ?? ()
+(gdb) where
+#0  0x00000000 in ?? ()
+#1  0xb5675fe1 in ?? () from /lib/i386-linux-gnu/libdl.so.2
+#2  0xb567642e in ?? () from /lib/i386-linux-gnu/libdl.so.2
+#3  0xb5675e98 in dlsym () from /lib/i386-linux-gnu/libdl.so.2
+#4  0xb755a45c in ?? () from /usr/lib/nvidia-304/libGL.so.1
+Backtrace stopped: previous frame inner to this frame (corrupt stack?)
+(gdb) list
+1	CBSPMeshFileLoader.cpp: No such file or directory.
+
+
+Using gdb:
+https://gcc.gnu.org/bugs/segfault.html
+https://cets.seas.upenn.edu/answers/gcc.html
+https://web.eecs.umich.edu/~sugih/pointers/summary.html
+
+
+UPDATE:
+The problem occured within the Copper basicmath.cpp where the C++ standard library was used. I guess it conflicts with Irrlicht somehow.

@@ -23,6 +23,8 @@ enum Value {
 	GUIWatcher,
 	Image,
 	Texture,
+	JSONStorage,
+	JSONAccessor,
 
 	LAST_INDEX, // Total number of types + starting index
 	FORCE_32BIT = 0x7fffffff, // NOT A TYPE. Forces enumeration to compile to 32 bits

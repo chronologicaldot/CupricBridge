@@ -4,7 +4,7 @@
 local v_cubr_path = "../../src/"
 local v_copper_path = "../../../CopperLang/Copper/src/"
 local v_copper_stdlib_path = "../../../CopperLang/Copper/stdlib/"
-local v_irrext_path = "../../../../IrrExtensions/"
+local v_irrext_path = "../../../../Irrlicht/IrrExtensions/"
 local v_irrlicht_home = "/usr/local"
 local v_irrlicht_include = "/usr/local/include/irrlicht/"
 
@@ -29,7 +29,7 @@ workspace "Debug CuBridge"
 project "Debug CuBridge"
 	targetname "tictactoe.out"
 	language "C++"
-	flags { "C++11" }
+	cppdialect "C++11"
 	kind "ConsoleApp"
 	links {
 		"Irrlicht",
@@ -55,6 +55,8 @@ project "Debug CuBridge"
 		, v_irrext_path .. "gui/GUIDropdownSelector.h"
 		, v_irrext_path .. "gui/GUIDropdownSelector.cpp"
 		, v_irrext_path .. "gui/GUIDropdownSelectorFactory.h"
+		, v_irrext_path .. "util/irrTree/irrTree.cpp"
+		, v_irrext_path .. "util/irrJSON/irrJSON.cpp"
 	}
 	removefiles {
 		v_cubr_path .. "excludes/**.h"
@@ -66,6 +68,8 @@ project "Debug CuBridge"
 		, "-I" .. v_b_copper_stdlib_path
 		, "-I" .. v_irrlicht_include
 		, "-I" .. v_b_irrext_path
+		, "-I" .. v_b_irrext_path .. "./util/irrTree"
+		, "-I" .. v_b_irrext_path .. "./util/irrJSON"
 		--, "-I" .. v_b_irr_unsafe_ext_path
 	}
 	linkoptions {
