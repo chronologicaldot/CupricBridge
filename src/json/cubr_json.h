@@ -202,7 +202,7 @@ OpenAndParse( Cu::FFIServices& );
 Cu::ForeignFunc::Result
 SetFilePath( Cu::FFIServices& );
 
-//! Creates an accessor and returns its index
+//! Creates an accessor and returns it
 //! \params JSONStorage storage
 Cu::ForeignFunc::Result
 CreateAccessor( Cu::FFIServices& );

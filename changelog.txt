@@ -1,5 +1,5 @@
 ====================
-2021/1/14, 2021/3/20, 2021/4/17
+2021/1/14, 2021/3/20, 2021/4/17, 2021/5/9
 
 - Fixed GUIWatcher::OnEvent() blocking event passback.
 - Added GUIWatcher::bringToFront() to allow inserting GUIWatcher between element and its parent.
@@ -8,6 +8,7 @@
 - Minor fixes to string return in AttributeSource::getAttributeAsStringW().
 - Added cubr_json.
 - Updated all the example premake5 files to use Irrlicht/IrrExtension and correctly access irrJSON.
+- Made cubr_json optional by a define INCLUDE_CUBR_JSON
 
 
 ====================

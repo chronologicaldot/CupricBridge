@@ -3,10 +3,16 @@
 #ifndef _COPPER_BRIDGE_H_
 #define _COPPER_BRIDGE_H_
 
+// Uncomment to include cubr_json or define it elsewhere
+// You will need irrTree and irrJSON from IrrExtensions somewhere in your project
+//#define INCLUDE_CUBR_JSON
+
 #include <IGUIEnvironment.h> // from Irrlicht
 #include <Copper.h>
 #include "cubr_base.h"
+#ifdef INCLUDE_CUBR_JSON
 #include "json/cubr_json.h"
+#endif
 
 namespace cubr {
 
@@ -22,7 +28,9 @@ protected:
 	Cu::Engine&  engine;
 	gui_environment_t*  guiEnvironment;
 	gui_element_t*  rootElement;
+#ifdef INCLUDE_CUBR_JSON
 	json::Hub jsonHub;
+#endif
 
 public:
 

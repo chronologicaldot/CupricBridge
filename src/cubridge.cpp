@@ -54,7 +54,9 @@ CuBridge::CuBridge(
 	: engine(eng)
 	, guiEnvironment(gui_environment)
 	, rootElement( gui_root_element )
+#ifdef INCLUDE_CUBR_JSON
 	, jsonHub(gui_environment->getFileSystem())
+#endif
 {
 	if ( ! rootElement )
 		rootElement = guiEnvironment->getRootGUIElement();
@@ -127,9 +129,11 @@ CuBridge::CuBridge(
 		Cu::addForeignFuncInstance(engine, is4, &SetImagePixel);
 	}
 
+#ifdef INCLUDE_CUBR_JSON
 	if ( flags.enableJSON ) {
 		jsonHub.addToEngine(engine);
 	}
+#endif
 
 		// gui_set_callback( elem: "gui event name" callback )
 	GUIWatcherObject::addSetterToEngine(engine);
