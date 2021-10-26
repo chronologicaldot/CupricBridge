@@ -61,7 +61,6 @@ private:
 
 	Cu::Engine&  engine;
 	EventCallback  guiEventCallbacks[irr::gui::EGET_COUNT];
-	util::List<Cu::Object*>  arguments;
 
 public:
 	//! cstor

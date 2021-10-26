@@ -18,6 +18,7 @@ namespace json {
 
 using irr::io::irrJSONElement;
 using irr::io::irrJSON;
+using util::CharList;
 
 /*
 	A Hub is needed for instantiating JSON storage objects.
@@ -107,6 +108,9 @@ public:
 
 	//!
 	bool setElementAttributes( Cu::FunctionObject& source );
+	
+	//!
+	bool isValid() { return valid(); }
 
 private:
 	bool valid() { return node != 0 && storage != 0; }
@@ -127,6 +131,9 @@ class Storage
 	irr::core::array<Accessor*>  accessors;
 
 public:
+	bool PrettyPrint; // Enable including newlines and tabs in writeToString
+
+	// ** cstor / dstor **
 
 	Storage( irr::io::IFileSystem* );
 
@@ -139,7 +146,10 @@ public:
 
 	virtual void
 	writeToString(String& out) const;
+private:
+	void writeNodeToString(irrTreeNode* node, CharList& out, unsigned depth) const;
 
+public:
 	static const char*
 	StaticTypeName() {
 		return "cubrjson";
@@ -163,7 +173,11 @@ public:
 
 	void setFilePath( const irr::io::path& );
 
-	bool writeToFile();
+	//! Creates a new element for the root so that Copper can build a JSON tree on it.
+	void initializeRoot();
+
+	// Write to file. An empty newFilePath string will result in using the filePath member value.
+	bool writeToFile( const irr::io::path* newFilePath=0 );
 
 	// KEEP THE ACCESSORS
 	// Even though the tree can be converted into a Copper structure, only the JSON tree can
@@ -184,10 +198,10 @@ public:
 	//! Convert the entire tree into the corresponding Copper variable/object structure.
 	//! The "storage" parameter MUST be initialized. It acts as the root tree node.
 	//! Note that multiple nodes with identical names will be merged into a single node.
-	bool convertToCopper( Cu::Function& storage );
+	//bool convertToCopper( Cu::Function& storage );
 
 	//! Convert from Copper, creating a JSON tree from the given Copper object.
-	bool convertFromCopper( Cu::Function& source );
+	//bool convertFromCopper( Cu::Function& source );
 };
 
 //-----------------------------------
@@ -202,10 +216,22 @@ OpenAndParse( Cu::FFIServices& );
 Cu::ForeignFunc::Result
 SetFilePath( Cu::FFIServices& );
 
+//! Enable pretty print (newlines and tabs) in writeToString
+Cu::ForeignFunc::Result
+EnablePrettyPrint( Cu::FFIServices& );
+
+//! Initialize the root with a node (used for creating JSON from Copper)
+Cu::ForeignFunc::Result
+InitRootNode( Cu::FFIServices& );
+
 //! Creates an accessor and returns it
 //! \params JSONStorage storage
 Cu::ForeignFunc::Result
 CreateAccessor( Cu::FFIServices& );
+
+//! Check validity of accessor (if it points to an existing node)
+Cu::ForeignFunc::Result
+CheckAccessorValidity( Cu::FFIServices& );
 
 //! Returns the child count of the node stored in the given accessor.
 //! \params JSONAcessor accessor
@@ -249,13 +275,15 @@ GetSetElementName( Cu::FFIServices& );
 Cu::ForeignFunc::Result
 GetSetElementAttrs( Cu::FFIServices& );
 
-//! TODO: Remove because this can be done in Copper
+/*
+//! Removed because this can be done in Copper
 Cu::ForeignFunc::Result
 ConvertJSONToCopper( Cu::FFIServices& );
 
-//! TODO: Remove because this can be done in Copper
+//! Removed because this can be done in Copper
 Cu::ForeignFunc::Result
 ConvertCopperToJSON( Cu::FFIServices& );
+*/
 
 //! Writes the given JSON object to file.
 //! \params JSONStorage storage

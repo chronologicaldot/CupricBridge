@@ -14,7 +14,7 @@
 //! Often Checked Attributes Definition
 /*
 	The default Irrlicht does not support accessing only a limited number of attributes, so setting attributes can be slow.
-	One workaround is definining within IAttributeExchangingObject the following:
+	One workaround is defining within IAttributeExchangingObject the following:
 	- Adding to E_ATTRIBUTE_READ_WRITE_FLAGS: EARWF_OFTEN_CHECKED_ATTRS = 0x00000008
 	- Using the flag within the deserializeAttributes() methods of GUI elements for the viewing of limited attributes.
 

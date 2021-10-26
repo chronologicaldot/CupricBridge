@@ -5,6 +5,12 @@
 #include <irrList.h>
 #include <IWriteFile.h>
 
+/*
+FIXME: Quotation marks in JSON files
+Currently, the JSON file loader interprets all attribute values as strings. This is the convenient thing to do, but it would be nice to modify the JSON loader to optionally include the quotation marks in the string so we can use them here to differentiate between true strings that need quotes and strings of numbers.
+NOTE: All JSON is strings, even the number representations, so Copper code will need to do the conversion. Copper math functions int() and dcml() will work.
+*/
+
 namespace cubr {
 
 bool isJSONStorageObject( Cu::Object&  object ) {
@@ -22,7 +28,10 @@ Hub::addToEngine( Cu::Engine& engine ) {
 	Cu::addForeignMethodInstance<Hub>(engine, "json", this, &Hub::Create);
 	Cu::addForeignFuncInstance(engine, "json_load", &OpenAndParse);
 	Cu::addForeignFuncInstance(engine, "json_filepath", &SetFilePath);
+	Cu::addForeignFuncInstance(engine, "json_pretty_print", &EnablePrettyPrint);
+	Cu::addForeignFuncInstance(engine, "json_init_root", &InitRootNode);
 	Cu::addForeignFuncInstance(engine, "json_root", &CreateAccessor);
+	Cu::addForeignFuncInstance(engine, "json_is_valid_access", &CheckAccessorValidity);
 	Cu::addForeignFuncInstance(engine, "json_child_count", &GetAccessorChildCount);
 	Cu::addForeignFuncInstance(engine, "json_child", &AccessorChild);
 	Cu::addForeignFuncInstance(engine, "json_add_child", &AddChild);
@@ -69,7 +78,9 @@ void
 Accessor::writeToString(String& out) const {
 	// TODO: Comment out
 	out = "{CuBridge JSON Accessor}";
-	// TODO: Write the node's value contents into the string
+	// TODO: Write the node's attribute value contents (and list of members) into the string.
+	// Should I do the entire tree? I'm not sure. You could get the full tree from
+	// Storage::writeToString().
 }
 
 const char*
@@ -114,7 +125,8 @@ Accessor*
 Accessor::addChild( const util::String& name ) {
 	irrTreeNode* childNode;
 	if ( valid() ) {
-		childNode = & (node->addNode(-1));
+		childNode = & (node->addNode(new irrJSONElement(), -1));
+		// Um... I forgot to create an element
 		((irrJSONElement*)childNode->getElem())->getName() = name.c_str();
 		return new Accessor(storage, childNode);
 	}
@@ -167,6 +179,7 @@ Accessor::getElementAttributes( Cu::FunctionObject*& storage ) {
 		accessHelper.setMemberData(
 			util::String( attr.name.c_str() ),
 			new Cu::StringObject( attr.value.c_str() ),
+			// ^ FIXME: See note at the top about quotation marks in JSON values
 			true
 		);
 	}
@@ -181,12 +194,11 @@ Accessor::setElementAttributes( Cu::FunctionObject& source ) {
 	irrJSONElement* element = (irrJSONElement*) node->getElem();
 	AttributeSource attributeSource( 0, source );
 	irr::u32 attrIdx = 0;
-	for (; attributeSource.getAttributeCount(); ++attrIdx) {
-		element->getAttributes().push_back(
-			irrJSONElement::Attribute(
-				attributeSource.getAttributeName(attrIdx),
-				attributeSource.getAttributeAsString(attrIdx).c_str()
-			)
+	for (; attrIdx < attributeSource.getAttributeCount(); ++attrIdx) {
+		element->addAttribute(
+			attributeSource.getAttributeName(attrIdx),
+			attributeSource.getAttributeAsString(attrIdx)
+			// ^ FIXME: See note at the top about quotation marks in JSON values
 		);
 	}
 	return true;
@@ -201,6 +213,7 @@ Storage::Storage( irr::io::IFileSystem* file_system )
 	, rootNode(0)
 	, json(fileSystem)
 	, accessors()
+	, PrettyPrint(false)
 {}
 
 Storage::~Storage() {
@@ -208,6 +221,10 @@ Storage::~Storage() {
 	for (; i < accessors.size(); i += 1)
 	{
 		accessors[i]->invalidate();
+	}
+	if ( rootNode ) {
+		delete rootNode;
+		rootNode = 0;
 	}
 }
 
@@ -226,10 +243,50 @@ Storage::copy() {
 
 void
 Storage::writeToString(String& out) const {
-	// TODO: Comment out
-	out = "{CuBridge JSON Storage}";
-	// TODO: Write the entire JSON tree to a string. Will be helpful for exporting.
-	// Tabs and newlines could be enabled/disabled with a Storage-internal flag.
+	//out = "{CuBridge JSON Storage}";
+	// Write the entire JSON tree to a string. Useful for exporting.
+	// Tabs and newlines are enabled/disabled with a Storage-internal flag, PrettyPrint.
+	CharList charlist;
+	writeNodeToString(rootNode, charlist, 0);
+	out = charlist;
+}
+
+void
+Storage::writeNodeToString(irrTreeNode* node, CharList& out, unsigned depth) const {
+	if (!node) return;
+	CharList tabs;
+	unsigned t=0;
+	if ( PrettyPrint )
+		for(; t < depth; ++t) { tabs.append("\t"); }
+
+	irrJSONElement* element = (irrJSONElement*)node->getElem();
+	String colonQuote = PrettyPrint? ": \"" : ":\"";
+	irr::core::list<irrJSONElement::Attribute>::Iterator attrItr = element->getAttributes().begin();
+	for(; attrItr != element->getAttributes().end(); ++attrItr ) {
+		if ( PrettyPrint ) out.append(tabs);
+		out.append( String( (*attrItr).name.c_str() ) );
+		// FIXME: See note at top about quotation marks in JSON values
+		out.append(colonQuote);
+		out.append( String( (*attrItr).value.c_str() ) );
+		out.append( "\"," );
+		if ( PrettyPrint ) out.append("\n");
+	}
+
+	irrJSONElement* childElem;
+	irr::core::string<c8> colonBracket = PrettyPrint? ": {" : ":{";
+	unsigned c=0;
+	for(; c < node->children.size(); ++c ) {
+		childElem = (irrJSONElement*)node->children[c]->getElem();
+		if ( PrettyPrint ) out.append(tabs);
+		out.append( (childElem->getName() + colonBracket).c_str() );
+		if ( PrettyPrint ) out.append("\n");
+		writeNodeToString( node->children[c], out, depth+1 );
+		if ( PrettyPrint ) out.append(tabs);
+		out.append("}");
+		if ( c != node->children.size() - 1) out.append(",");
+		if ( PrettyPrint ) out.append("\n");
+	}
+	//if ( PrettyPrint ) out.append("\n");
 }
 
 const char*
@@ -252,6 +309,10 @@ Storage::parseFile( const irr::io::path& p ) {
 		accessors[a]->invalidate();
 	}
 	accessors.clear();
+	if ( rootNode ) {
+		delete rootNode;
+		rootNode = 0;
+	}
 	filePath = p;
 	return json.parseFile(filePath, rootNode);
 }
@@ -261,15 +322,29 @@ Storage::setFilePath( const irr::io::path& p ) {
 	filePath = p;
 }
 
-bool
-Storage::writeToFile() {
-	if ( filePath.size() == 0 ) return false;
-	if ( ! fileSystem->existFile(filePath) ) return false;
+void Storage::initializeRoot() {
+	if ( rootNode )
+		delete rootNode;
+	rootNode = new irrTreeNode(0, 0, new irrJSONElement());
+}
 
-	irr::io::IWriteFile* outFile = fileSystem->createAndWriteFile(filePath, false);
+bool
+Storage::writeToFile( const irr::io::path* newFilePath ) {
+	irr::io::path finalPath;
+	if ( newFilePath != 0 && newFilePath->size() != 0) {
+		finalPath = *newFilePath;
+	}
+	if ( finalPath.size() == 0 ) {
+		if ( filePath.size() == 0 ) return false;
+		finalPath = filePath;
+	}
+
+	irr::io::IWriteFile* outFile = fileSystem->createAndWriteFile(finalPath, false);
 	if ( !outFile ) return false;
 
-	// TODO
+	String out;
+	writeToString(out);
+	outFile->write(out.c_str(), out.size());
 
 	return true;
 }
@@ -298,6 +373,7 @@ Storage::deregisterAccessor( Accessor* acc ) {
 	}
 }
 
+/*
 bool
 Storage::convertToCopper( Cu::Function& storage ) {
 	if ( !rootNode ) return false;
@@ -319,10 +395,10 @@ Storage::convertFromCopper( Cu::Function& source ) {
 
 	return false;
 }
+*/
 
 //-------------------------------
 
-//! Load JSON from a file
 Cu::ForeignFunc::Result
 OpenAndParse( Cu::FFIServices& ffi ) {
 	if ( ! ffi.demandArgType(0, Storage::getTypeAsCuType())
@@ -331,8 +407,8 @@ OpenAndParse( Cu::FFIServices& ffi ) {
 		return Cu::ForeignFunc::NONFATAL;
 	}
 	util::String filepathString = ((Cu::StringObject&)ffi.arg(1)).getString();
-	((Storage&)ffi.arg(0)).parseFile( irr::io::path(filepathString.c_str()) );
-
+	bool result = ((Storage&)ffi.arg(0)).parseFile( irr::io::path(filepathString.c_str()) );
+	ffi.setNewResult( new Cu::BoolObject(result) );
 	return Cu::ForeignFunc::FINISHED;
 }
 
@@ -345,7 +421,26 @@ SetFilePath( Cu::FFIServices& ffi ) {
 	}
 	util::String filepathString = ((Cu::StringObject&)ffi.arg(1)).getString();
 	((Storage&)ffi.arg(0)).setFilePath( irr::io::path(filepathString.c_str()) );
+	return Cu::ForeignFunc::FINISHED;
+}
 
+Cu::ForeignFunc::Result
+EnablePrettyPrint( Cu::FFIServices& ffi ) {
+	if ( !ffi.demandArgType(0, Storage::getTypeAsCuType())
+		|| !ffi.demandArgType(1, Cu::ObjectType::Bool)
+	) {
+		return Cu::ForeignFunc::NONFATAL;
+	}
+	((Storage&)ffi.arg(0)).PrettyPrint = ((Cu::BoolObject&)ffi.arg(1)).getValue();
+	return Cu::ForeignFunc::FINISHED;
+}
+
+Cu::ForeignFunc::Result
+InitRootNode( Cu::FFIServices& ffi ) {
+	if ( ! ffi.demandArgType(0, Storage::getTypeAsCuType()) ) {
+		return Cu::ForeignFunc::NONFATAL;
+	}
+	((Storage&)ffi.arg(0)).initializeRoot();
 	return Cu::ForeignFunc::FINISHED;
 }
 
@@ -356,6 +451,16 @@ CreateAccessor( Cu::FFIServices& ffi ) {
 	}
 	Storage& jsonStorage = (Storage&)ffi.arg(0);
 	ffi.setNewResult(jsonStorage.createAccessor());
+	return Cu::ForeignFunc::FINISHED;
+}
+
+Cu::ForeignFunc::Result
+CheckAccessorValidity( Cu::FFIServices& ffi ) {
+	if ( ! ffi.demandArgType(0, Accessor::getTypeAsCuType()) ) {
+		return Cu::ForeignFunc::NONFATAL;
+	}
+	Accessor& accessor = (Accessor&)ffi.arg(0);
+	ffi.setNewResult( new Cu::BoolObject( accessor.isValid() ) );
 	return Cu::ForeignFunc::FINISHED;
 }
 
@@ -463,6 +568,7 @@ GetSetElementAttrs( Cu::FFIServices& ffi ) {
 	return Cu::ForeignFunc::FINISHED;
 }
 
+/*
 Cu::ForeignFunc::Result
 ConvertJSONToCopper( Cu::FFIServices& ffi ) {
 	// TODO? Can be implemented in Copper.
@@ -474,6 +580,7 @@ ConvertCopperToJSON( Cu::FFIServices& ffi ) {
 	// TODO? Can be implemented in Copper.
 	return Cu::ForeignFunc::FINISHED;
 }
+*/
 
 Cu::ForeignFunc::Result
 WriteJSON( Cu::FFIServices& ffi ) {
@@ -483,16 +590,18 @@ WriteJSON( Cu::FFIServices& ffi ) {
 	}
 	Storage& storage = (Storage&)ffi.arg(0);
 	util::String filepathString;
+	irr::io::path filepath;
 	if ( ffi.getArgCount() == 2 ) {
 		// TODO Should be an object wrapping irr::io::path instead of String
 		if ( ffi.demandArgType(1, Cu::ObjectType::String) ) {
 			filepathString = ((Cu::StringObject&)ffi.arg(1)).getString();
-			storage.setFilePath( irr::io::path(filepathString.c_str()) );
+			filepath = irr::io::path(filepathString.c_str());
+			//storage.setFilePath( filepath );
 		} else {
 			return Cu::ForeignFunc::NONFATAL;
 		}
 	}
-	storage.writeToFile();
+	storage.writeToFile(&filepath);
 
 	return Cu::ForeignFunc::FINISHED;
 }
