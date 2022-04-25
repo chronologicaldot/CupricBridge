@@ -1,4 +1,12 @@
 ====================
+2022/4/21
+
+- Changed CuStrToIrrStrW() to use utf8ToWchar().
+- Changed isAscii() to only check for c>=0.
+- Fixed buffer problems in CuStrToIrrStrW() and IrrStrWToCuStr().
+
+
+====================
 2021/10/23
 
 - Changed cubr_json OpenAndParse to set Copper return as bool result of Storage::parseFile.

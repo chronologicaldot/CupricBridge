@@ -9,7 +9,7 @@ namespace cubr {
 
 inline bool
 isAscii(char c) {
-	return c >= 0 && c <= 127;
+	return c >= 0;
 }
 
 // Filter to Low-end ASCII (e.g. from UTF-8)

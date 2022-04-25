@@ -43,29 +43,39 @@ CuStrToWchar( util::String in ) {
 
 util::String
 IrrStrWToCuStr( irr::core::stringw in ) {
-	char*  cs = new char[in.size()*2]; // wchar_t is 2 bytes, utf8 is up to 4.
-	irr::core::wcharToUtf8(in.c_str(), cs, in.size()+1);
+	irr::u64 size = (in.size()+1)*6; // wchar_t is 2-4 bytes, utf8 is up to 6.
+	char*  cs = new char[size];
+	irr::core::wcharToUtf8(in.c_str(), cs, size);
 	util::String  cus(cs);
 	delete [] cs;
 	return cus;
 }
 
+//irr::core::stringw
+//CuStrToIrrStrW( util::String in ) {
+//	irr::core::stringw  wcs;
+//	multibyteToWString(wcs, in.c_str(), in.size()); // Depends on LC_CTYPE / locale
+//	return wcs;
+//}
+
 irr::core::stringw
 CuStrToIrrStrW( util::String in ) {
 	irr::core::stringw  wcs;
-	multibyteToWString(wcs, in.c_str(), in.size());
+	irr::u64  s = (irr::u64)(in.size()+1)*sizeof(wchar_t);
+	wchar_t* buf = new wchar_t[s];
+	irr::core::utf8ToWchar(in.c_str(), buf, s);
+	wcs.append(buf);
+	delete [] buf;
 	return wcs;
 }
 
 util::String
 wcharToCuStr( const wchar_t* wcs,  irr::u64  size ) {
-	char*  cs = new char[size*2]; // wchar_t is 2 bytes, utf8 is up to 4.
-	irr::core::wcharToUtf8(wcs, cs, size+1);
+	char*  cs = new char[(size+1)*4]; // wchar_t is 2-4 bytes, utf8 is up to 6.
+	irr::core::wcharToUtf8(wcs, cs, (size+1)*4);
 	util::String  cus(cs);
 	delete [] cs;
 	return cus;
-
-	// Alternatively, use the functions in irrString.h, like in Element::setText() above.
 }
 
 irr::io::path
@@ -75,7 +85,7 @@ CuStrToIrrPath( util::String s ) {
 	// FIXME: For some reason, fschar_t is set to char but the path is still read as wchar_t
 	//if ( sizeof(char) == sizeof(irr::fschar_t) ) {
 		// fschar_t is char
-		p = utf8ToASCII(s).c_str();
+		//p = utf8ToASCII(s).c_str();
 	//} else {
 		// Multibyte filesystem (fschar_t == wchar_t)
 		p = irr::io::path(CuStrToIrrStrW(s));
