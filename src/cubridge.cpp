@@ -663,7 +663,7 @@ CuBridge::image_to_texture( Cu::FFIServices&  ffi ) {
 }
 
 ForeignFunc::Result
-CuBridge::texture_remove_from_driver( Cu::FFIServices& )
+CuBridge::texture_remove_from_driver( Cu::FFIServices& ffi )
 {
 	if ( !ffi.demandArgType(0, Texture::getTypeAsCuType()) )
 	{
