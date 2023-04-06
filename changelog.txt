@@ -1,4 +1,11 @@
 ====================
+2023/4/5
+
+- Fixed bug in image_to_texture() that incorrectly obtained the string name from arg(0) instead of arg(1)
+- Added texture_remove_from_driver()
+
+
+====================
 2022/4/21
 
 - Changed CuStrToIrrStrW() to use utf8ToWchar().

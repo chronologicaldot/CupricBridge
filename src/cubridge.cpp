@@ -653,11 +653,26 @@ CuBridge::image_to_texture( Cu::FFIServices&  ffi ) {
 	}
 
 	image_t*  img = ((Image&)ffi.arg(0)).getImage();
-	util::String  name = ((Cu::StringObject&)ffi.arg(0)).getString();
+	util::String  name = ((Cu::StringObject&)ffi.arg(1)).getString();
 
 	texture_t*  tex = guiEnvironment->getVideoDriver()->addTexture( name.c_str(), img );
 	if ( tex )
 		ffi.setNewResult( new Texture(tex) );
+
+	return ForeignFunc::FINISHED;
+}
+
+ForeignFunc::Result
+CuBridge::texture_remove_from_driver( Cu::FFIServices& )
+{
+	if ( !ffi.demandArgType(0, Texture::getTypeAsCuType()) )
+	{
+		return ForeignFunc::NONFATAL;
+	}
+	
+	texture_t*  tex = ((Texture&)ffi.arg(0)).getTexture();
+	if ( tex )
+		guiEnvironment->getVideoDriver()->removeTexture(tex);
 
 	return ForeignFunc::FINISHED;
 }

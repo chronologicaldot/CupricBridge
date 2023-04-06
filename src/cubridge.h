@@ -134,6 +134,12 @@ public:
 
 			// image_to_texture( image: )
 	ForeignFunc::Result  image_to_texture( Cu::FFIServices& );
+	
+			// texture_remove_from_driver( texture: )
+	// By default, textures are added to the video driver via image_to_texture()
+	// but they must be manually removed via this method to save memory because
+	// they are not removed when simply destroying the Copper texture object
+	ForeignFunc::Result  texture_remove_from_driver( Cu::FFIServices& );
 
 		// Image and Texture methods
 	virtual texture_t*
